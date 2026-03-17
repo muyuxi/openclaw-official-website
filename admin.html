@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw 管理后台</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --sidebar-width: 260px;
+            --topbar-height: 70px;
+            --bg-light: #f8f9ff;
+            --text-muted: #6c757d;
+            --border-color: #e9ecef;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-light);
+            color: #333;
+            overflow-x: hidden;
+        }
+        .admin-container {
+            display: flex;
+            min-height: 100vh;
+        }
+        /* 侧边栏 */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            position: fixed;
+            height: 100vh;
+            left: 0;
+            top: 0;
+            transition: transform 0.3s;
+            z-index: 1000;
+        }
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        .sidebar-header::before {
+            content: "🦞";
+            font-size: 2rem;
+        }
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        .menu-item {
+            padding: 1rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: white;
+            text-decoration: none;
+            transition: background 0.3s;
+            cursor: pointer;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255,255,255,0.1);
+            border-left: 4px solid white;
+        }
+        .menu-item i {
+            width: 20px;
+            text-align: center;
+        }
+        .menu-divider {
+            height: 1px;
+            background: rgba(255,255,255,0.1);
+            margin: 1rem 0;
+        }
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+        }
+        /* 顶部导航 */
+        .topbar {
+            height: var(--topbar-height);
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        .search-box {
+            position: relative;
+        }
+        .search-box input {
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            width: 300px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .search-box input:focus {
+            border-color: var(--primary-color);
+        }
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        .notification-bell {
+            font-size: 1.2rem;
+            position: relative;
+            cursor: pointer;
+        }
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        /* 内容区 */
+        .content-wrapper {
+            padding: 2rem;
+        }
+        .page-title {
+            font-size: 1.8rem;
+            margin-bottom: 2rem;
+            font-weight: 700;
+        }
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.15);
+        }
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+        }
+        .stat-icon.blue {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary-color);
+        }
+        .stat-icon.green {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+        .stat-icon.yellow {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+        }
+        .stat-icon.red {
+            background: rgba(220, 53, 69, 0.1);
+            color: var(--danger-color);
+        }
+        .stat-info h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+        .stat-info p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        .trend-up {
+            color: var(--success-color);
+            font-size: 0.8rem;
+        }
+        .trend-down {
+            color: var(--danger-color);
+            font-size: 0.8rem;
+        }
+        /* 图表区 */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .chart-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .chart-filter {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+        }
+        /* 活动列表 */
+        .activity-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .activity-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .activity-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .view-all {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .activity-list {
+            padding: 0 2rem;
+        }
+        .activity-item {
+            padding: 1.2rem 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        .activity-content {
+            flex: 1;
+        }
+        .activity-text {
+            margin-bottom: 0.5rem;
+        }
+        .activity-time {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+        .activity-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .badge-success {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--warning-color);
+        }
+        .badge-info {
+            background: rgba(102, 126, 234, 0.1);
+            color: var(--primary-color);
+        }
+        /* 表格 */
+        .table-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .table-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        .btn-add {
+            padding: 0.75rem 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.3s;
+        }
+        .btn-add:hover {
+            transform: translateY(-2px);
+        }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .data-table th {
+            padding: 1rem 2rem;
+            text-align: left;
+            background: var(--bg-light);
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        .data-table td {
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .data-table tr:hover {
+            background: rgba(102, 126, 234, 0.02);
+        }
+        .user-cell {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .user-avatar-sm {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-active {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--success-color);
+        }
+        .status-inactive {
+            background: rgba(108, 117, 125, 0.1);
+            color: var(--text-muted);
+        }
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .btn-action {
+            padding: 0.5rem;
+            border: 1px solid var(--border-color);
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-action:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        /* 响应式 */
+        @media (max-width: 1024px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                margin-left: 0;
+                width: 100%;
+            }
+            .menu-toggle {
+                display: block;
+            }
+            .search-box input {
+                width: 200px;
+            }
+            .content-wrapper {
+                padding: 1rem;
+            }
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            .topbar {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                OpenClaw Admin
+            </div>
+            <div class="sidebar-menu">
+                <a href="#dashboard" class="menu-item active">
+                    <i class="fa fa-tachometer"></i>
+                    <span>仪表盘</span>
+                </a>
+                <a href="#users" class="menu-item">
+                    <i class="fa fa-users"></i>
+                    <span>用户管理</span>
+                </a>
+                <a href="#content" class="menu-item">
+                    <i class="fa fa-file-text"></i>
+                    <span>内容管理</span>
+                </a>
+                <a href="#plugins" class="menu-item">
+                    <i class="fa fa-plug"></i>
+                    <span>插件管理</span>
+                </a>
+                <a href="#skills" class="menu-item">
+                    <i class="fa fa-book"></i>
+                    <span>技能市场</span>
+                </a>
+                <div class="menu-divider"></div>
+                <a href="#settings" class="menu-item">
+                    <i class="fa fa-cog"></i>
+                    <span>系统设置</span>
+                </a>
+                <a href="#logs" class="menu-item">
+                    <i class="fa fa-history"></i>
+                    <span>操作日志</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- 主内容区 -->
+        <main class="main-content">
+            <!-- 顶部导航 -->
+            <nav class="topbar">
+                <div class="topbar-left">
+                    <div class="menu-toggle" id="menuToggle">
+                        <i class="fa fa-bars"></i>
+                    </div>
+                    <div class="search-box">
+                        <i class="fa fa-search"></i>
+                        <input type="text" placeholder="搜索...">
+                    </div>
+                </div>
+                <div class="topbar-right">
+                    <div class="notification-bell">
+                        <i class="fa fa-bell"></i>
+                        <span class="notification-badge">3</span>
+                    </div>
+                    <div class="user-info">
+                        <div class="user-avatar">A</div>
+                        <span>Admin</span>
+                        <i class="fa fa-chevron-down"></i>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- 内容区 -->
+            <div class="content-wrapper">
+                <h1 class="page-title">仪表盘</h1>
+
+                <!-- 统计卡片 -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fa fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>1,286</h3>
+                            <p>总用户数 <span class="trend-up"><i class="fa fa-arrow-up"></i> 12.5%</span></p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fa fa-plug"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>47</h3>
+                            <p>活跃插件 <span class="trend-up"><i class="fa fa-arrow-up"></i> 8.2%</span></p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon yellow">
+                            <i class="fa fa-tasks"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>2,845</h3>
+                            <p>任务执行 <span class="trend-up"><i class="fa fa-arrow-up"></i> 23.1%</span></p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fa fa-server"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>99.8%</h3>
+                            <p>系统可用性 <span class="trend-down"><i class="fa fa-arrow-down"></i> 0.2%</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 图表区 -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">任务执行趋势</h3>
+                            <select class="chart-filter">
+                                <option>最近7天</option>
+                                <option>最近30天</option>
+                                <option>最近90天</option>
+                            </select>
+                        </div>
+                        <canvas id="taskChart" height="300"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3 class="chart-title">插件使用分布</h3>
+                        </div>
+                        <canvas id="pluginChart" height="300"></canvas>
+                    </div>
+                </div>
+
+                <!-- 最近活动和用户表 -->
+                <div class="charts-grid">
+                    <div class="activity-card">
+                        <div class="activity-header">
+                            <h3 class="activity-title">最近活动</h3>
+                            <a href="#" class="view-all">查看全部</a>
+                        </div>
+                        <div class="activity-list">
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    <i class="fa fa-user"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">新用户 <strong>张三</strong> 注册成功</div>
+                                    <div class="activity-time">2分钟前</div>
+                                </div>
+                                <span class="activity-badge badge-success">新用户</span>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    <i class="fa fa-plug"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">插件 <strong>飞书集成</strong> 版本更新到 v2.1.0</div>
+                                    <div class="activity-time">15分钟前</div>
+                                </div>
+                                <span class="activity-badge badge-info">更新</span>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    <i class="fa fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">系统检测到异常登录尝试，已拦截</div>
+                                    <div class="activity-time">1小时前</div>
+                                </div>
+                                <span class="activity-badge badge-warning">警告</span>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-avatar">
+                                    <i class="fa fa-tasks"></i>
+                                </div>
+                                <div class="activity-content">
+                                    <div class="activity-text">定时任务 <strong>每日数据备份</strong> 执行成功</div>
+                                    <div class="activity-time">3小时前</div>
+                                </div>
+                                <span class="activity-badge badge-success">成功</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-card">
+                        <div class="table-header">
+                            <h3 class="table-title">最近用户</h3>
+                            <button class="btn-add">
+                                <i class="fa fa-plus"></i> 新增用户
+                            </button>
+                        </div>
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>用户</th>
+                                    <th>邮箱</th>
+                                    <th>状态</th>
+                                    <th>注册时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <div class="user-avatar-sm" style="background: #667eea;">L</div>
+                                            <span>李四</span>
+                                        </div>
+                                    </td>
+                                    <td>lisi@example.com</td>
+                                    <td><span class="status-badge status-active">活跃</span></td>
+                                    <td>2026-03-17</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-action"><i class="fa fa-edit"></i></button>
+                                            <button class="btn-action"><i class="fa fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <div class="user-avatar-sm" style="background: #28a745;">W</div>
+                                            <span>王五</span>
+                                        </div>
+                                    </td>
+                                    <td>wangwu@example.com</td>
+                                    <td><span class="status-badge status-active">活跃</span></td>
+                                    <td>2026-03-16</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-action"><i class="fa fa-edit"></i></button>
+                                            <button class="btn-action"><i class="fa fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <div class="user-cell">
+                                            <div class="user-avatar-sm" style="background: #ffc107;">Z</div>
+                                            <span>赵六</span>
+                                        </div>
+                                    </td>
+                                    <td>zhaoliu@example.com</td>
+                                    <td><span class="status-badge status-inactive">未激活</span></td>
+                                    <td>2026-03-15</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            <button class="btn-action"><i class="fa fa-edit"></i></button>
+                                            <button class="btn-action"><i class="fa fa-trash"></i></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // 菜单切换
+        document.getElementById('menuToggle').addEventListener('click', function() {
+            document.getElementById('sidebar').classList.toggle('open');
+        });
+
+        // 任务趋势图
+        const taskCtx = document.getElementById('taskChart').getContext('2d');
+        new Chart(taskCtx, {
+            type: 'line',
+            data: {
+                labels: ['周一', '周二', '周三', '周四', '周五', '周六', '周日'],
+                datasets: [{
+                    label: '成功任务',
+                    data: [320, 380, 420, 390, 450, 580, 620],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: '失败任务',
+                    data: [12, 18, 15, 22, 8, 16, 10],
+                    borderColor: '#dc3545',
+                    backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // 插件分布图
+        const pluginCtx = document.getElementById('pluginChart').getContext('2d');
+        new Chart(pluginCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['飞书', '微信', 'Telegram', '浏览器', '其他插件'],
+                datasets: [{
+                    data: [35, 25, 15, 15, 10],
+                    backgroundColor: [
+                        '#667eea',
+                        '#28a745',
+                        '#ffc107',
+                        '#dc3545',
+                        '#6c757d'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // 菜单项点击切换
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                document.querySelectorAll('.menu-item').forEach(i => i.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>
