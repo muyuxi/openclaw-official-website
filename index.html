@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw - 可扩展的AI助手框架</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        header {
+            padding: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .logo::before {
+            content: "🦞";
+            font-size: 2rem;
+        }
+        nav {
+            display: flex;
+            gap: 2rem;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.3s;
+        }
+        nav a:hover {
+            opacity: 0.8;
+        }
+        .hero {
+            text-align: center;
+            padding: 6rem 0;
+            color: white;
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+        }
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.95;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .buttons {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .btn {
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn-primary {
+            background: white;
+            color: #667eea;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            background: rgba(255,255,255,0.3);
+        }
+        .features {
+            background: white;
+            padding: 6rem 0;
+            border-radius: 50px 50px 0 0;
+            margin-top: 2rem;
+        }
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 4rem;
+            color: #333;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+        }
+        .feature-card {
+            padding: 2rem;
+            border-radius: 20px;
+            background: #f8f9ff;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.15);
+        }
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+        .feature-card p {
+            color: #666;
+            line-height: 1.7;
+        }
+        footer {
+            background: #1a1a2e;
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+        footer p {
+            opacity: 0.7;
+        }
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .hero p {
+                font-size: 1.1rem;
+            }
+            nav {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">OpenClaw</div>
+            <nav>
+                <a href="#features">特性</a>
+                <a href="https://docs.openclaw.ai">文档</a>
+                <a href="https://github.com/openclaw/openclaw">GitHub</a>
+                <a href="https://discord.com/invite/clawd">社区</a>
+            </nav>
+        </header>
+
+        <section class="hero">
+            <h1>构建你的专属AI超级助理</h1>
+            <p>OpenClaw是一个高度可扩展的开源AI助手框架，支持多模态能力、插件扩展、跨平台部署，让你轻松打造符合自己需求的智能助手。</p>
+            <div class="buttons">
+                <a href="https://docs.openclaw.ai/getting-started" class="btn btn-primary">快速开始</a>
+                <a href="https://github.com/openclaw/openclaw" class="btn btn-secondary">GitHub 星标</a>
+            </div>
+        </section>
+    </div>
+
+    <section class="features" id="features">
+        <div class="container">
+            <h2>核心特性</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🔌</div>
+                    <h3>插件扩展系统</h3>
+                    <p>丰富的插件生态，支持飞书、微信、Telegram等多平台接入，轻松扩展能力边界。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🧠</div>
+                    <h3>多模型支持</h3>
+                    <p>兼容GPT、Claude、Gemini、Doubao等主流大模型，自由切换不受限制。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>低代码编排</h3>
+                    <p>可视化工作流编排，无需复杂编码即可实现复杂的自动化工作流。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>本地优先</h3>
+                    <p>支持完全本地部署，数据完全可控，隐私安全有保障。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>智能体能力</h3>
+                    <p>内置多智能体协作能力，支持任务拆分、并行执行、自动迭代优化。</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🌐</div>
+                    <h3>跨平台部署</h3>
+                    <p>支持Windows、macOS、Linux、Docker等多种部署方式，随处可运行。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 OpenClaw. 开源免费，让AI惠及每一个人。</p>
+        </div>
+    </footer>
+</body>
+</html>
