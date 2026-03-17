@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw 用户管理</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#f7f9fc;--panel:#fff;--line:#e6ebf2;--text:#0f172a;--muted:#64748b;--primary:#2563eb;--success:#16a34a;--warn:#ca8a04}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text)}
+    .page{max-width:1400px;margin:0 auto;padding:28px}
+    .header{display:flex;justify-content:space-between;align-items:end;gap:18px;flex-wrap:wrap;margin-bottom:24px}
+    .header h1{font-size:38px;letter-spacing:-.04em}
+    .header p{color:var(--muted);margin-top:8px}
+    .actions{display:flex;gap:12px;flex-wrap:wrap}
+    .btn,.ghost{padding:14px 18px;border-radius:14px;font-weight:700;border:none;cursor:pointer}
+    .btn{background:var(--primary);color:#fff}
+    .ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:0 16px 40px rgba(15,23,42,.05)}
+    .stat{padding:22px}
+    .stat span{font-size:13px;color:var(--muted)}
+    .stat strong{display:block;font-size:30px;letter-spacing:-.04em;margin-top:10px}
+    .toolbar{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center;padding:18px 22px;margin-bottom:16px}
+    .search{display:flex;gap:12px;flex-wrap:wrap}
+    input,select{border:1px solid var(--line);background:#fbfdff;border-radius:14px;padding:13px 15px;min-width:200px;outline:none}
+    table{width:100%;border-collapse:collapse}
+    th,td{text-align:left;padding:18px 22px;border-top:1px solid var(--line)}
+    th{font-size:13px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:#fbfcff}
+    tr:hover td{background:#fcfdff}
+    .user{display:flex;align-items:center;gap:12px}
+    .avatar{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;font-weight:800;color:#fff}
+    .sub{font-size:13px;color:var(--muted);margin-top:4px}
+    .tag{display:inline-flex;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .active{background:rgba(22,163,74,.12);color:var(--success)}
+    .review{background:rgba(202,138,4,.12);color:var(--warn)}
+    .role{background:rgba(37,99,235,.10);color:var(--primary)}
+    .ops{display:flex;gap:8px;flex-wrap:wrap}
+    .ops button{border:1px solid var(--line);background:#fff;padding:10px 12px;border-radius:12px;cursor:pointer}
+    @media (max-width: 1100px){.stats{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width: 760px){.stats{grid-template-columns:1fr}.page{padding:16px}.header h1{font-size:30px}.toolbar{padding:16px}.card{overflow:auto}}
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="header">
+      <div>
+        <h1>用户管理</h1>
+        <p>查看后台成员、角色分配、最近活跃情况与账号状态。</p>
+      </div>
+      <div class="actions">
+        <button class="ghost" onclick="location.href='./admin.html'">返回仪表盘</button>
+        <button class="btn">新增管理员</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="card stat"><span>总成员数</span><strong>126</strong></div>
+      <div class="card stat"><span>近 7 天活跃</span><strong>83</strong></div>
+      <div class="card stat"><span>待审核账号</span><strong>7</strong></div>
+      <div class="card stat"><span>角色组</span><strong>5</strong></div>
+    </div>
+
+    <div class="card">
+      <div class="toolbar">
+        <div class="search">
+          <input placeholder="搜索成员姓名 / 邮箱">
+          <select><option>全部角色</option><option>超级管理员</option><option>内容运营</option><option>技术支持</option></select>
+          <select><option>全部状态</option><option>活跃</option><option>待审核</option></select>
+        </div>
+        <div class="actions">
+          <button class="ghost">导出列表</button>
+          <button class="btn">批量授权</button>
+        </div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>成员</th>
+            <th>角色</th>
+            <th>状态</th>
+            <th>最近登录</th>
+            <th>来源</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="user">
+                <div class="avatar" style="background:#2563eb">JL</div>
+                <div><strong>江临</strong><div class="sub">jianglin@openclaw.ai</div></div>
+              </div>
+            </td>
+            <td><span class="tag role">超级管理员</span></td>
+            <td><span class="tag active">活跃</span></td>
+            <td>今天 10:41</td>
+            <td>后台邀请</td>
+            <td><div class="ops"><button>编辑</button><button>禁用</button></div></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user">
+                <div class="avatar" style="background:#0f766e">MS</div>
+                <div><strong>孟书</strong><div class="sub">mengshu@openclaw.ai</div></div>
+              </div>
+            </td>
+            <td><span class="tag role">内容运营</span></td>
+            <td><span class="tag active">活跃</span></td>
+            <td>今天 09:12</td>
+            <td>官网注册</td>
+            <td><div class="ops"><button>编辑</button><button>重置密码</button></div></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user">
+                <div class="avatar" style="background:#9333ea">QY</div>
+                <div><strong>祁越</strong><div class="sub">qiyue@openclaw.ai</div></div>
+              </div>
+            </td>
+            <td><span class="tag role">技术支持</span></td>
+            <td><span class="tag review">待审核</span></td>
+            <td>从未登录</td>
+            <td>管理员创建</td>
+            <td><div class="ops"><button>通过</button><button>拒绝</button></div></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="user">
+                <div class="avatar" style="background:#dc2626">YN</div>
+                <div><strong>岳宁</strong><div class="sub">yuening@openclaw.ai</div></div>
+              </div>
+            </td>
+            <td><span class="tag role">数据分析</span></td>
+            <td><span class="tag active">活跃</span></td>
+            <td>昨天 22:08</td>
+            <td>SSO 接入</td>
+            <td><div class="ops"><button>查看权限</button><button>编辑</button></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

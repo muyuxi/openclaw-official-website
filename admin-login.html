@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw 后台登录</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#f5f7fb;
+      --panel:#ffffff;
+      --line:#e8edf5;
+      --text:#101828;
+      --muted:#667085;
+      --primary:#2563eb;
+      --accent:#0f172a;
+      --success:#16a34a;
+    }
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top left, rgba(37,99,235,.14), transparent 32%),
+        radial-gradient(circle at bottom right, rgba(15,23,42,.08), transparent 26%),
+        var(--bg);
+      color:var(--text);
+      display:grid;
+      place-items:center;
+      padding:24px;
+    }
+    .shell{
+      width:min(1100px,100%);
+      min-height:720px;
+      display:grid;
+      grid-template-columns:1.08fr .92fr;
+      background:rgba(255,255,255,.7);
+      backdrop-filter:blur(14px);
+      border:1px solid rgba(255,255,255,.75);
+      box-shadow:0 30px 80px rgba(15,23,42,.10);
+      border-radius:32px;
+      overflow:hidden;
+    }
+    .brand{
+      padding:48px;
+      background:linear-gradient(180deg, #eff6ff 0%, #ffffff 100%);
+      position:relative;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      width:max-content;
+      padding:10px 14px;
+      border-radius:999px;
+      background:#fff;
+      border:1px solid var(--line);
+      box-shadow:0 10px 30px rgba(37,99,235,.08);
+      color:#1d4ed8;
+      font-weight:700;
+      font-size:14px;
+      letter-spacing:.02em;
+    }
+    .badge::before{content:"OC";display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#dbeafe;color:#1d4ed8;font-size:12px}
+    .hero h1{
+      font-size:56px;
+      line-height:1.02;
+      letter-spacing:-.04em;
+      margin:24px 0 18px;
+      max-width:10ch;
+    }
+    .hero p{
+      color:var(--muted);
+      font-size:17px;
+      line-height:1.8;
+      max-width:56ch;
+    }
+    .points{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:18px;
+      margin-top:40px;
+    }
+    .point{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:22px;
+      padding:20px;
+      box-shadow:0 16px 40px rgba(15,23,42,.05);
+    }
+    .point strong{display:block;font-size:14px;margin-bottom:8px}
+    .point span{font-size:13px;color:var(--muted);line-height:1.7}
+    .float-card{
+      position:absolute;
+      right:36px;
+      top:34px;
+      width:220px;
+      padding:18px;
+      border-radius:24px;
+      background:rgba(15,23,42,.92);
+      color:#fff;
+      box-shadow:0 24px 60px rgba(15,23,42,.18);
+    }
+    .float-card .label{font-size:12px;opacity:.7;margin-bottom:8px}
+    .float-card .value{font-size:28px;font-weight:800;letter-spacing:-.03em}
+    .float-card .desc{font-size:12px;opacity:.75;margin-top:10px;line-height:1.7}
+    .form-wrap{
+      background:var(--panel);
+      padding:48px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .form-card{
+      width:min(430px,100%);
+    }
+    .eyebrow{
+      color:#1d4ed8;
+      font-size:13px;
+      font-weight:700;
+      letter-spacing:.08em;
+      margin-bottom:12px;
+    }
+    .form-card h2{
+      font-size:38px;
+      letter-spacing:-.04em;
+      line-height:1.08;
+      margin-bottom:10px;
+    }
+    .sub{
+      color:var(--muted);
+      line-height:1.8;
+      margin-bottom:28px;
+    }
+    .field{display:grid;gap:8px;margin-bottom:18px}
+    label{font-size:14px;font-weight:600}
+    .input{
+      width:100%;
+      border:1px solid var(--line);
+      border-radius:16px;
+      padding:15px 16px;
+      font-size:15px;
+      outline:none;
+      transition:.2s border-color,.2s box-shadow,.2s transform;
+      background:#fbfcfe;
+    }
+    .input:focus{
+      border-color:#93c5fd;
+      box-shadow:0 0 0 4px rgba(37,99,235,.10);
+      transform:translateY(-1px);
+      background:#fff;
+    }
+    .helper{font-size:12px;color:var(--muted);line-height:1.7}
+    .row{display:flex;justify-content:space-between;align-items:center;margin:4px 0 22px;gap:12px}
+    .checkbox{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:14px}
+    .link{color:#1d4ed8;text-decoration:none;font-size:14px;font-weight:600}
+    .btn{
+      width:100%;
+      border:none;
+      border-radius:18px;
+      padding:16px 18px;
+      background:linear-gradient(135deg,#2563eb 0%,#0f172a 100%);
+      color:#fff;
+      font-size:15px;
+      font-weight:700;
+      cursor:pointer;
+      box-shadow:0 18px 40px rgba(37,99,235,.22);
+      transition:transform .2s ease, box-shadow .2s ease;
+    }
+    .btn:hover{transform:translateY(-2px);box-shadow:0 24px 50px rgba(37,99,235,.26)}
+    .btn:active{transform:translateY(0) scale(.99)}
+    .quick{
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:12px;
+      margin-top:16px;
+    }
+    .ghost{
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:16px;
+      padding:14px 16px;
+      text-align:center;
+      text-decoration:none;
+      color:var(--accent);
+      font-weight:600;
+    }
+    .security{
+      margin-top:24px;
+      padding:16px 18px;
+      border-radius:18px;
+      background:#f8fafc;
+      border:1px solid var(--line);
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.8;
+    }
+    .status{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      color:var(--success);
+      font-size:13px;
+      font-weight:700;
+      margin-top:18px;
+    }
+    .status::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--success);box-shadow:0 0 0 6px rgba(22,163,74,.12)}
+    @media (max-width: 980px){
+      .shell{grid-template-columns:1fr}
+      .brand{display:none}
+      .form-wrap{padding:28px}
+      .form-card h2{font-size:32px}
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="brand">
+      <div>
+        <div class="badge">OpenClaw 管理中心</div>
+        <div class="float-card">
+          <div class="label">当前系统状态</div>
+          <div class="value">99.82%</div>
+          <div class="desc">服务可用率保持稳定，插件同步与任务调度均处于健康状态。</div>
+        </div>
+        <div class="hero">
+          <h1>把智能体、插件和运营数据放进一个控制台。</h1>
+          <p>面向团队协作、内容运营和工作流自动化的统一后台。登录后即可查看任务趋势、插件表现、用户活跃度和系统配置状态。</p>
+        </div>
+        <div class="points">
+          <div class="point">
+            <strong>统一任务视图</strong>
+            <span>把执行记录、异常告警和日常运营数据汇总到一个仪表盘里处理。</span>
+          </div>
+          <div class="point">
+            <strong>权限与安全</strong>
+            <span>支持后台入口隔离、操作审计和核心配置管理，适合内部团队协作。</span>
+          </div>
+          <div class="point">
+            <strong>插件级监控</strong>
+            <span>快速查看消息渠道、知识库和浏览器自动化能力的运行情况。</span>
+          </div>
+          <div class="point">
+            <strong>内容和用户管理</strong>
+            <span>适合后续继续扩展公告、站点文案、账号管理与统计分析等能力。</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="form-wrap">
+      <div class="form-card">
+        <div class="eyebrow">ADMIN ACCESS</div>
+        <h2>登录 OpenClaw 后台</h2>
+        <p class="sub">这是一个演示型后台入口页，用于承接官网与后台系统。你可以继续接入真实鉴权、接口与角色权限体系。</p>
+
+        <div class="field">
+          <label for="email">管理员邮箱</label>
+          <input id="email" class="input" type="email" placeholder="admin@openclaw.ai">
+          <div class="helper">请输入绑定后台权限的邮箱账号。</div>
+        </div>
+
+        <div class="field">
+          <label for="password">登录密码</label>
+          <input id="password" class="input" type="password" placeholder="请输入密码">
+          <div class="helper">当前页面为静态演示，不会真实提交凭据。</div>
+        </div>
+
+        <div class="row">
+          <label class="checkbox"><input type="checkbox"> 记住当前设备</label>
+          <a class="link" href="#">忘记密码</a>
+        </div>
+
+        <button class="btn" id="loginBtn">进入后台控制台</button>
+        <div class="quick">
+          <a class="ghost" href="./admin.html">直接查看后台</a>
+          <a class="ghost" href="./index.html">返回官网首页</a>
+        </div>
+
+        <div class="security">
+          建议后续补充：真实登录接口、验证码、角色权限、操作审计、双因素认证，以及 IP 与设备登录记录。
+        </div>
+        <div class="status">登录服务演示页面已就绪</div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    document.getElementById('loginBtn').addEventListener('click', function () {
+      window.location.href = './admin.html';
+    });
+  </script>
+</body>
+</html>
